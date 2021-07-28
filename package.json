@@ -1,0 +1,28 @@
+{
+  "name": "BooyahClipper",
+  "version": "0.5.5",
+  "description": "Un clipeador de VODs de booyah.live",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "build"
+  },
+  "author": "elmarceloc",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^13.1.7",
+    "electron-builder": "^22.11.7"
+  },
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "axios": "^0.21.1",
+    "fluent-ffmpeg": "^2.1.2"
+  },
+  "build": {
+    "appId": "com.elmarceloc.booyahclipper",
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    }
+  }
+}

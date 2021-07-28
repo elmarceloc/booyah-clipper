@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <title>Booyah clipper by elmarceloc</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+  
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" integrity="sha512-dqw6X88iGgZlTsONxZK9ePmJEFrmHwpuMrsUChjAw1mRUhUITE5QU9pkcSox+ynfLhL15Sv2al5A0LVyDCmtUw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" integrity="sha512-8bHTC73gkZ7rZ7vpqUQThUDhqcNFyYi2xgDgPDHc+GXVGHXq+xPjynxIopALmOPqzo9JZj0k6OqqewdGO3EsrQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <div id="app">
+
+
+      <div class="ui inverted menu">
+        <div class="header item"><img src="icon.png"></img>  Booyah.tv Clipper</div>
+        <a @click="settab('vod')" :class="{ active: tab === 'vod' }" class="item">Descargar VOD</a>
+        <a @click="settab('clipper')" :class="{ active: tab === 'clipper' }" class="item">Clipear</a>
+        
+        <div class="right menu">
+          <div class="item">
+            <div class="ui transparent inverted icon input">
+              <i class="search icon"></i>
+              <input  v-model="input" type="text" placeholder="63681555">
+            </div>
+          </div>
+          <a class="item" @click="search">Buscar</a>
+        </div>
+      </div>
+      <div class="ui container">
+        
+
+
+        <div v-if="tab == 'vod'">
+
+          <div v-if="err" class="ui negative message">
+            <div class="header">
+              No se ha encontrado el canal.
+            </div>
+            <p>Recuerda que no es el nombre de usuario, sino el id </br>(por ejemplo https://booyah.live/channels/63681555  ==> 63681555)
+          </p></div>
+
+        <div class="ui one column stackable center aligned page grid" style="margin: 20px;">
+          <div class="column twelve wide">
+              
+              <h1 v-if="channelName" class="ui header">VODs de "{{channelName}}"</h1>
+            </div>
+        </div>
+
+        <div class="ui four column doubling stackable grid container">
+
+            <div class="ui icon message" v-if="vods.length == 0">
+              <i class="video icon"></i>
+              <div class="content">
+                <div class="header">
+                  ¡Busca un streamer!
+                </div>
+                <p>Usa el id del canal que aparece en la URL de un canal.</p>
+              </div>
+              </div>
+            <div v-for="vod in vods" class="column">
+            
+  
+            <div class="ui card">
+              <div class="image">
+                <img :src="vod.playback.thumbnail_url">
+              </div>
+              <div class="content">
+                <a class="header" target="_blank" :href='"https://booyah.live/vods/"+vod.stats.vod_id' >{{vod.playback.name}}</a>
+                <div class="meta">
+                  <span class="date">{{ vod.playback.create_time_ms | formatDate    }}</span>
+                </div>
+                <div class="description">
+                  {{vod.playback.description}}
+                </div>
+              </div>
+              <div class="extra content">
+                <a  target="_blank" :href="vod.playback.endpoint_list[0].download_url">
+                  <i class="user arrow circle down"></i>
+                  <button class="ui primary button fluid">
+                    Descargar
+                  </button>
+                  
+                  </a>
+              </div>
+            </div>
+
+          </div>
+         
+        </div>
+          
+        </div>
+
+        <div v-if="tab == 'clipper'">
+
+          <div class="ui one column stackable center aligned page grid" style="margin: 20px;">
+            <div class="column sixteen wide">
+
+              <div class="ui message">
+                <div class="header">
+                  Quedara guardado en la carpeta <b>"videos"</b> con el nombre espesificado.
+                </div>
+              </div>
+
+              <h1 class="ui header">Seleciona un VOD</h1>
+
+              </br>
+              </br>
+              </br>
+
+              <div class="ui big form">
+                <div class="three fields">
+                  <div class="field">
+                    <label>Nombre</label>
+                    <input v-model="clip_name" placeholder="clip" type="text">
+                  </div>
+                  <div class="field">
+                    <label>Desde</label>
+                    <input id="from" placeholder="0:0:12" type="text">
+                  </div>
+                  <div class="field">
+                    <label>Duracion</label>
+                    <input id="duration" placeholder="34 (Segundos)" type="text">
+                  </div>
+                </div>
+
+                <button @click="clip(false)" class="ui submit button primary">Selecionar video a clipear</button>
+                <button @click="clip(true)" :class="{ disabled: !last }" class="ui submit button blue">Usar el ultomo VOD selecionado</button>
+
+                <div class="ui success  message" v-if="path != ''">
+                  <div class="header">
+                    Guardando en {{path}}
+                  </div>
+                </div>
+              </div>
+
+         <!--   </br>
+            </br>
+            </br>
+              <div class="ui form">
+
+                <div class="field">
+                  <label title="usa la funcion de exportar del clipeador de booyah.tv y pega el codigo aca">Pega el codigo aca</label>
+                  <textarea rows="2"></textarea>
+                </div>
+              </div>
+                <div class="ui fluid submit button orange ">Importar</div>
+
+            </div>
+          </div>-->
+      </div>
+
+      </div>
+        
+
+    </div>
+  </div>
+</div>
+
+    <!-- You can also require other files to run in this process -->
+    <script src="./renderer.js"></script>
+  </body>
+</html>

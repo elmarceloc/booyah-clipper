@@ -1,0 +1,19 @@
+body {
+  background-color: white;
+}
+.ui .card {
+  height: 290px;
+}
+.ui input{
+    width: 300px!important;
+}
+.primary{
+    background-color: rgb(158,77,255)!important;
+}
+.menu{
+    border-radius: 0!important;
+
+}
+.inputfile{
+    padding-right: 560px!important;
+}
